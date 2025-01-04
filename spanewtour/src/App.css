@@ -43,3 +43,7 @@
 .cx_login {
   width: 20%;
 }
+
+.nav-link{
+  text-decoration: none;
+}

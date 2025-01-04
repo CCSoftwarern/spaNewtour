@@ -1,0 +1,28 @@
+/* SidePanel.css */
+.side-panel {
+    position: fixed;
+    right: -300px; /* Esconde o painel fora da tela */
+    top: 0;
+    height: 100%;
+    width: 500px;
+    background-color: white;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+    z-index: 1000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: right 0.3s ease; /* Transição suave */
+}
+
+.side-panel-open .side-panel {
+    right: 0; /* Desliza o painel para dentro da tela */
+}
+
+.side-panel-content {
+    flex: 1;
+}
+
+.btn-close {
+    align-self: flex-end;
+}
