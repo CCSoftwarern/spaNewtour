@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import SidePanel from './SidePanel';
-import { EyeFill } from 'react-bootstrap-icons';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import './animation.css'; // Importação do arquivo CSS para animação
 
-const supabaseUrl =  import.meta.env.VITE_API_URL;
-const supabaseKey = import.meta.env.VITE_API_KEY ;
+const supabaseUrl = import.meta.env.VITE_API_URL;
+const supabaseKey = import.meta.env.VITE_API_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 function Cards() {
@@ -17,14 +18,48 @@ function Cards() {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
-        const { data, error } = await supabase.from('entregas').select('*').order('id', { ascending: true });
+    // const fetchData = async (status) => {
+    //     const { data, error } = await supabase
+    //         .from('entregas')
+    //         .select('*')
+    //         .eq('status', status) // Filtrar pelo status
+    //         .order('id', { ascending: true });
+    
+    //     if (error) {
+    //         setError(error);
+    //     } else {
+    //         setEntregas(data);
+    //     }
+    // };
+
+    // const fetchData = async (status) => {
+    //     const { data, error } = await supabase
+    //         .from('entregas,pessoa')
+    //         .select('entregas.id, pessoa.nome') // Seleciona o id da entrega e o nome da pessoa
+    //         .or('entregas.id_pessoa = pessoa.idpessoa')
+    //         .order('id', { ascending: true });
+    
+    //     if (error) {
+    //         setError(error);
+    //     } else {
+    //         setEntregas(data);
+    //     }
+    // };
+
+    const fetchData = async (status) => {
+        const { data, error } = await supabase
+            .rpc('fetch_entregas_com_nome_cliente');
+    
         if (error) {
+            console.error('Erro ao carregar os dados:', error);
             setError(error);
         } else {
+            console.log('Dados carregados:', data); // Adicione este log para verificar a estrutura dos dados
             setEntregas(data);
         }
     };
+
+    
 
     const deleteEntrega = async (id) => {
         const { error } = await supabase
@@ -57,9 +92,8 @@ function Cards() {
         if (error) {
             setError(error);
         } else {
-            fetchData(); 
+            fetchData();
             setEntregas([...entregas, data[0]]);
-            // Recarrega os dados da lista após a inserção, se necessário
         }
     };
 
@@ -85,35 +119,41 @@ function Cards() {
                 <button type="button" className="btn btn-outline-primary btn-lg">Right</button>
             </div>
 
-            <table className="table mt-3">
-                <thead>
-                    <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">ID Pessoa</th>
-                        <th scope="col">Endereço de Retirada</th>
-                        <th scope="col">Endereço de Entrega</th>
-                        <th scope="col">Ação</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {entregas.map((entrega) => (
-                        <tr key={entrega.id}>
-                            <td>{entrega.id}</td>
-                            <td>{entrega.id_pessoa}</td>
-                            <td>{entrega.endereco_retirada}</td>
-                            <td>{entrega.endereco_entrega}</td>
-                            <td>
-                                <div className="btn-group" role="group" aria-label="Basic outlined example">
-                                    <button className="btn btn-primary" onClick={() => alert(`Visualizar ${entrega.id}`)}>Visualizar</button>
-                                    <button className="btn btn-secondary" onClick={() => openEditPanel(entrega)}>Editar</button>
-                                    <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Deletar</button>
-                                    <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Imprimir</button>
-                                </div>
-                            </td>
+            <TransitionGroup className="table mt-3">
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome cliente</th>
+                            <th scope="col">Endereço de Retirada</th>
+                            <th scope="col">Endereço de Entrega</th>
+                            <th scope="col">Valor</th>
+                            <th scope="col">Ação</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {entregas.map((entrega) => (
+                            <CSSTransition key={entrega.id} timeout={500} classNames="fade">
+                                <tr>
+                                    <td>{entrega.id}</td>
+                                    <td>{entrega.nome_cliente}</td>
+                                    <td>{entrega.endereco_retirada}</td>
+                                    <td>{entrega.endereco_entrega}</td>
+                                    <td>R$ {entrega.vr_calculado}</td>
+                                    <td>
+                                        <div className="btn-group" role="group" aria-label="Basic outlined example">
+                                            <button className="btn btn-primary" onClick={() => alert(`Visualizar ${entrega.id}`)}>Visualizar</button>
+                                            <button className="btn btn-secondary" onClick={() => openEditPanel(entrega)}>Editar</button>
+                                            <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Deletar</button>
+                            
+                                        </div>
+                                    </td>
+                                </tr>
+                            </CSSTransition>
+                        ))}
+                    </tbody>
+                </table>
+            </TransitionGroup>
 
             {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
         </div>
