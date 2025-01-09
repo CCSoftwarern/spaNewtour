@@ -3,10 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import Select from 'react-select';
 import './SidePanel.css';
 import InputMask from 'react-input-mask';
-import {NumericFormat} from 'react-number-format';
+import { NumericFormat } from 'react-number-format';
 import 'bootstrap/dist/css/bootstrap.min.css';
-
-
 
 const supabaseUrl = import.meta.env.VITE_API_URL;
 const supabaseKey = import.meta.env.VITE_API_KEY;
@@ -51,7 +49,6 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
 
             setLoading(true);
 
-            // Modificando a consulta para buscar por nome ou telefone
             const { data, error } = await supabase
                 .from('pessoa')
                 .select('*')
@@ -133,7 +130,6 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                     endereco: enderecoRetirada,
                 }]);
 
-
             if (error) {
                 setError('Erro ao adicionar nova pessoa: ' + error.message);
             } else {
@@ -147,7 +143,6 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
             }
         } finally {
             setShowNewPessoaForm(false)
-           
         }
     };
 
@@ -163,8 +158,6 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
         { value: 2, label: 'Boleto' },
         { value: 3, label: 'Transferência' },
     ];
-
-    
 
     return (
         <div className="side-panel" ref={panelRef}>
@@ -185,10 +178,11 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Pesquise pelo nome ou telefone"
                                 required
+                                disabled={showNewPessoaForm} // Desabilita o campo quando for adicionar nova pessoa
                             />
                         </div>
                         {loading && <div>Carregando...</div>}
-                        {pessoas.length > 0 && (
+                        {pessoas.length > 0 && !showNewPessoaForm && (
                             <div className="mb-3">
                                 <label className="form-label">Selecione uma Pessoa</label>
                                 <Select
@@ -209,7 +203,10 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                         {pessoas.length === 0 && !showNewPessoaForm && (
                             <button
                                 className="btn btn-secondary"
-                                onClick={() => setShowNewPessoaForm(true)}
+                                onClick={() => {
+                                    setSearchTerm(''); // Limpa o campo de pesquisa
+                                    setShowNewPessoaForm(true); // Mostra o formulário de nova pessoa
+                                }}
                             >
                                 Adicionar Nova Pessoa
                             </button>
@@ -242,10 +239,9 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                                     />
                                 </div>
                                 <div className="d-grid gap-2 d-md-block">
-                                <button type="submit" className="btn btn-primary"> Adicionar Pessoa</button> 
-                                <button type="button" className="btn btn-secondary ml-2" onClick={() => setShowNewPessoaForm(false)}>Cancelar</button>
+                                    <button type="submit" className="btn btn-primary">Adicionar Pessoa</button> 
+                                    <button type="button" className="btn btn-secondary ml-2" onClick={() => setShowNewPessoaForm(false)}>Cancelar</button>
                                 </div>
-                               
                             </form>
                         )}
                     </div>
@@ -298,7 +294,6 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                                 decimalSeparator=","
                                 prefix="R$ "
                                 required
-                        
                             />
                         </div>
                         <div className="mb-3">

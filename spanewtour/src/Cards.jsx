@@ -109,7 +109,17 @@ function Cards() {
 
     if (error) {
         return <div>Erro ao carregar os dados: {error.message}</div>;
-    }
+    };
+
+    useEffect(() => {
+        fetchData(); // Chama a função inicialmente para carregar os dados
+        const intervalId = setInterval(() => {
+            fetchData(); // Atualiza os dados a cada 10 segundos
+        }, 5000); // 10000 milissegundos = 10 segundos
+
+        // Limpa o intervalo quando o componente for desmontado
+        return () => clearInterval(intervalId);
+    }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
     return (
         <div className={`container ${isPanelOpen ? 'side-panel-open' : ''}`}>
