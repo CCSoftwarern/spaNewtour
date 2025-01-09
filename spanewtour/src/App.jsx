@@ -7,10 +7,9 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 import Cards from './Cards';
 import { BrowserRouter, Routes, Link, Route } from "react-router-dom";
 
-const supabase = createClient(
-  'https://fbnksoaqkdblysrswdrr.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZibmtzb2Fxa2RibHlzcnN3ZHJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU1NzA3MzIsImV4cCI6MjA1MTE0NjczMn0.l1fT3s5gaOlqJ2r_Hza6KHPYyq0WZPKeX2Ly6xbqWug'
-);
+const supabaseUrl = import.meta.env.VITE_API_URL;
+const supabaseKey = import.meta.env.VITE_API_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 export default function App() {
   const [session, setSession] = useState(null);
