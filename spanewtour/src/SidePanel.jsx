@@ -130,6 +130,7 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
                     endereco: enderecoRetirada,
                 }]);
 
+
             if (error) {
                 setError('Erro ao adicionar nova pessoa: ' + error.message);
             } else {
@@ -214,6 +215,18 @@ const SidePanel = ({ onClose, onInsert, onUpdate, entrega, usuarioAtual }) => {
 
                         {showNewPessoaForm && (
                             <form onSubmit={handleNewPessoaSubmit}>
+                                <div className="mb-3">
+                                    <label htmlFor="nomePessoa" className="form-label">Nome da Pessoa</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="nomePessoa"
+                                        value={searchTerm} // Usa searchTerm para permitir a edição do nome
+                                        onChange={(e) => setSearchTerm(e.target.value)} // Atualiza o nome
+                                        placeholder="Digite o nome da pessoa"
+                                        required
+                                    />
+                                </div>
                                 <div className="mb-3">
                                     <label htmlFor="celular" className="form-label">Celular</label>
                                     <InputMask

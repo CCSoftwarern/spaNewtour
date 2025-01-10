@@ -122,7 +122,8 @@ function Cards() {
     }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
     return (
-        <div className={`container ${isPanelOpen ? 'side-panel-open' : ''}`}>
+        <div className='container-fluid'>
+            <div className={`container ${isPanelOpen ? 'side-panel-open' : ''}`}>
             <div className="btn-group" role="group" aria-label="Basic outlined example">
                 <button type="button" className="btn btn btn-success btn-lg" onClick={toggleSidePanel}>Inserir</button>
                 <button type="button" className="btn btn-outline-primary btn-lg" onClick={fetchData}>Atualizar</button>
@@ -167,6 +168,9 @@ function Cards() {
 
             {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
         </div>
+
+        </div>
+        
     );
 }
 

@@ -79,6 +79,7 @@ export default function App() {
       <div>
         <nav className="navbar bg-danger" data-bs-theme="dark">
           <div className="container-fluid">
+          <p className="fs-4">.fs-4 text</p>
             <a className="navbar-brand" href="#">
             <i class="bi bi-stack-overflow"></i> {user?.email}
             </a>
