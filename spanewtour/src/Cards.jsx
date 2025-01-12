@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import SidePanel from './SidePanel';
+import SidePanelMotoboy from './SidePanelMotoboys'; // Importação do SidePanelMotoboy
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './animation.css'; // Importação do arquivo CSS para animação
 
@@ -10,43 +11,18 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 function Cards() {
     const [entregas, setEntregas] = useState([]);
+    const [motoboys, setMotoboys] = useState([]);  // Estado para armazenar os motoboys
     const [error, setError] = useState(null);
     const [isPanelOpen, setIsPanelOpen] = useState(false);
+    const [isMotoboyPanelOpen, setIsMotoboyPanelOpen] = useState(false);  // Estado para o painel de motoboy
     const [currentEntrega, setCurrentEntrega] = useState(null);
 
     useEffect(() => {
         fetchData();
+        fetchMotoboys(); // Chama a função para buscar os motoboys
     }, []);
 
-    // const fetchData = async (status) => {
-    //     const { data, error } = await supabase
-    //         .from('entregas')
-    //         .select('*')
-    //         .eq('status', status) // Filtrar pelo status
-    //         .order('id', { ascending: true });
-    
-    //     if (error) {
-    //         setError(error);
-    //     } else {
-    //         setEntregas(data);
-    //     }
-    // };
-
-    // const fetchData = async (status) => {
-    //     const { data, error } = await supabase
-    //         .from('entregas,pessoa')
-    //         .select('entregas.id, pessoa.nome') // Seleciona o id da entrega e o nome da pessoa
-    //         .or('entregas.id_pessoa = pessoa.idpessoa')
-    //         .order('id', { ascending: true });
-    
-    //     if (error) {
-    //         setError(error);
-    //     } else {
-    //         setEntregas(data);
-    //     }
-    // };
-
-    const fetchData = async (status) => {
+    const fetchData = async () => {
         const { data, error } = await supabase
             .rpc('fetch_entregas_com_nome_cliente');
     
@@ -54,18 +30,37 @@ function Cards() {
             console.error('Erro ao carregar os dados:', error);
             setError(error);
         } else {
-            console.log('Dados carregados:', data); // Adicione este log para verificar a estrutura dos dados
+            console.log('Dados carregados:', data);
             setEntregas(data);
         }
     };
 
+    const fetchMotoboys = async () => {
+        const { data, error } = await supabase
+            .from('motoboys') // Aqui você vai buscar os motoboys
+            .select('*');
     
+        if (error) {
+            console.error('Erro ao carregar os motoboys:', error);
+            setError(error);
+        } else {
+            console.log('Motoboys carregados:', data);
+            setMotoboys(data);
+        }
+    };
 
     const deleteEntrega = async (id) => {
+        const shouldDelete = window.confirm("Tem certeza que deseja excluir esta entrega?");
+        
+        if (!shouldDelete) {
+            return;
+        }
+        
         const { error } = await supabase
             .from('entregas')
             .delete()
             .eq('id', id);
+        
         if (error) {
             setError(error);
         } else {
@@ -102,9 +97,18 @@ function Cards() {
         setCurrentEntrega(null);
     };
 
+    const openEncaminharPanel = (entrega) => {
+        setCurrentEntrega(entrega);  // Define a entrega que será encaminhada
+        setIsMotoboyPanelOpen(true);  // Abre o painel de motoboys
+    };
+
     const openEditPanel = (entrega) => {
-        setCurrentEntrega(entrega);
-        setIsPanelOpen(true);
+        setCurrentEntrega(entrega);  // Define a entrega que será editada
+        setIsPanelOpen(true);        // Abre o SidePanel
+    };
+
+    const closeMotoboyPanel = () => {
+        setIsMotoboyPanelOpen(false);  // Fecha o painel de motoboys
     };
 
     if (error) {
@@ -122,55 +126,55 @@ function Cards() {
     }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
     return (
-        <div className='container-fluid'>
-            <div className={`container ${isPanelOpen ? 'side-panel-open' : ''}`}>
-            <div className="btn-group" role="group" aria-label="Basic outlined example">
-                <button type="button" className="btn btn btn-success btn-lg" onClick={toggleSidePanel}>Inserir</button>
-                <button type="button" className="btn btn-outline-primary btn-lg" onClick={fetchData}>Atualizar</button>
-                <button type="button" className="btn btn-outline-primary btn-lg">Right</button>
+        <div className="container-fluid">
+            <div className={`container ${isPanelOpen || isMotoboyPanelOpen ? 'side-panel-open' : ''}`}>
+                <div className="btn-group d-flex flex-wrap" role="group" aria-label="Basic outlined example">
+                    <button type="button" className="btn btn-success btn-lg mb-3" onClick={toggleSidePanel}>Inserir</button>
+                    <button type="button" className="btn btn-outline-primary btn-lg mb-3" onClick={fetchData}>Atualizar</button>
+                </div>
+
+                <TransitionGroup className="table-responsive mt-3">
+                    <table className="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nome cliente</th>
+                                <th scope="col">Endereço de Retirada</th>
+                                <th scope="col">Endereço de Entrega</th>
+                                <th scope="col">Valor</th>
+                                <th scope="col">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {entregas.map((entrega) => (
+                                <CSSTransition key={entrega.id} timeout={500} classNames="fade">
+                                    <tr>
+                                        <td>{entrega.id}</td>
+                                        <td>{entrega.nome_cliente}</td>
+                                        <td>{entrega.endereco_retirada}</td>
+                                        <td>{entrega.endereco_entrega}</td>
+                                        <td>R$ {entrega.vr_calculado}</td>
+                                        <td>
+                                            <div className="btn-group" role="group" aria-label="Basic outlined example">
+                                                <button className="btn btn-primary" onClick={() => openEncaminharPanel(entrega)}>Encaminhar</button>
+                                                <button className="btn btn-secondary" onClick={() => openEditPanel(entrega)}>Editar</button>
+                                                <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Deletar</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </CSSTransition>
+                            ))}
+                        </tbody>
+                    </table>
+                </TransitionGroup>
+
+                {/* Exibe o SidePanel para editar ou inserir entrega */}
+                {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
+
+                {/* Exibe o SidePanelMotoboy para encaminhar a entrega */}
+                {isMotoboyPanelOpen && <SidePanelMotoboy onClose={closeMotoboyPanel} entrega={currentEntrega} motoboys={motoboys} />}
             </div>
-
-            <TransitionGroup className="table mt-3">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">ID</th>
-                            <th scope="col">Nome cliente</th>
-                            <th scope="col">Endereço de Retirada</th>
-                            <th scope="col">Endereço de Entrega</th>
-                            <th scope="col">Valor</th>
-                            <th scope="col">Ação</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {entregas.map((entrega) => (
-                            <CSSTransition key={entrega.id} timeout={500} classNames="fade">
-                                <tr>
-                                    <td>{entrega.id}</td>
-                                    <td>{entrega.nome_cliente}</td>
-                                    <td>{entrega.endereco_retirada}</td>
-                                    <td>{entrega.endereco_entrega}</td>
-                                    <td>R$ {entrega.vr_calculado}</td>
-                                    <td>
-                                        <div className="btn-group" role="group" aria-label="Basic outlined example">
-                                            <button className="btn btn-primary" onClick={() => alert(`Visualizar ${entrega.id}`)}>Visualizar</button>
-                                            <button className="btn btn-secondary" onClick={() => openEditPanel(entrega)}>Editar</button>
-                                            <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Deletar</button>
-                            
-                                        </div>
-                                    </td>
-                                </tr>
-                            </CSSTransition>
-                        ))}
-                    </tbody>
-                </table>
-            </TransitionGroup>
-
-            {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
         </div>
-
-        </div>
-        
     );
 }
 

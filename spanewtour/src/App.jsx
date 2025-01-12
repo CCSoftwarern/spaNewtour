@@ -14,8 +14,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export default function App() {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
-  const urlImg = './src/assets/iconeBranco.svg';
-
+  
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -52,81 +51,61 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, []); 
 
   if (!session) {
     return (
-      <div className="container mt-4 rounded bg-white shadow" style={{ width: '25rem' }}>
-        <div>
-          <br />
-          <h2>Login</h2>
-          <p className="text-body-secondary">Informe suas credenciais para acessar o sistema.</p>
-          <hr />
-        </div>
-        <div>
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
-            providers={[]}
-          />
-        </div>
+      <div className="container mt-5 p-4 rounded bg-white shadow-sm" style={{ width: '100%', maxWidth: '400px' }}>
+        <h2 className="mb-3">Login</h2>
+        <p className="text-muted mb-4">Informe suas credenciais para acessar o sistema.</p>
+        <Auth
+          supabaseClient={supabase}
+          appearance={{ theme: ThemeSupa }}
+          providers={[]}
+        />
       </div>
     );
   }
 
   return (
-    <>
-      <div>
-        <nav className="navbar bg-danger" data-bs-theme="dark">
-          <div className="container-fluid">
-          <p className="fs-4">.fs-4 text</p>
-            <a className="navbar-brand" href="#">
-            <i class="bi bi-stack-overflow"></i> {user?.email}
-            </a>
-            <button onClick={signOut} className="btn btn-danger">Sair</button>
+    <BrowserRouter> {/* Envolva toda a aplicação com o BrowserRouter */}
+      <>
+        <div>
+          <nav className="navbar navbar-expand-lg navbar-dark bg-danger">
+            <div className="container-fluid">
+              <a className="navbar-brand fs-4" href="#">
+                <i className="bi bi-stack-overflow me-2"></i>{user?.email}
+              </a>
+              <button onClick={signOut} className="btn btn-outline-light">Sair</button>
+            </div>
+          </nav>
+        </div>
+
+        <div className="d-flex">
+          {/* Sidebar */}
+          <div className="bg-light border-end" style={{ width: '250px', height: '100vh' }}>
+            <ul className="nav flex-column p-3">
+              <li className="nav-item">
+                <Link className="nav-link fs-5" to="/">Entregas</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link fs-5" to="/ematendimento">Em Atendimento</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link fs-5" to="/finalizados">Finalizados</Link>
+              </li>
+            </ul>
           </div>
-        </nav>
-      </div>
-      {/* <div className="container mt-4">
-        <h2>Bem-vindo, {user?.email}!</h2>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Email</th>
-              <th scope="col">Criado em</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>{user?.id}</td>
-              <td>{user?.email}</td>
-              <td>{new Date(user?.created_at).toLocaleDateString()}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div> */}
-      <div className='container'>
-        <BrowserRouter>
-          <ul className="nav justify-content-center mt-4 nav-tabs mb-3">
-            <li className="nav-item">
-              <li className='nav-link fs-4'><Link to="/">Entregas</Link></li>
-            </li>
-            <li className="nav-item">
-              <li className='nav-link fs-4'><Link to="/ematendimento">Em atendimento</Link></li>
-            </li>
-            <li className="nav-item">
-              <li className='nav-link fs-4'><Link to="/finalizados">Finalizados</Link></li>
-            </li>
-            <li className="nav-item">
-              <li className='nav-link fs-4'><Link to="/">Entregas</Link></li>
-            </li>
-          </ul>
-          <Routes>
-            <Route path='/' element={<Cards />} />
-          </Routes>
-        </BrowserRouter>
-      </div>
-    </>
+
+          {/* Main content */}
+          <div className="container mt-4" style={{ marginLeft: '250px', flex: 1 }}>
+            <Routes>
+              <Route path="/" element={<Cards />} />
+              {/* Defina as rotas adicionais aqui se necessário */}
+            </Routes>
+          </div>
+        </div>
+      </>
+    </BrowserRouter> 
   );
 }
