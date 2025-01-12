@@ -10,15 +10,18 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.47.10",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
     "dotenv": "^16.4.7",
+    "font-awesome": "^4.7.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.7",
     "react-bootstrap-icons": "^1.11.5",
+    "react-bootstrap-sidebar-menu": "^2.0.3",
     "react-dom": "^18.3.1",
     "react-input-mask": "^2.0.4",
     "react-number-format": "^5.4.3",

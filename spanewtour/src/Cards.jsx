@@ -4,6 +4,7 @@ import SidePanel from './SidePanel';
 import SidePanelMotoboy from './SidePanelMotoboys'; // Importação do SidePanelMotoboy
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './animation.css'; // Importação do arquivo CSS para animação
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const supabaseUrl = import.meta.env.VITE_API_URL;
 const supabaseKey = import.meta.env.VITE_API_KEY;
@@ -16,6 +17,8 @@ function Cards() {
     const [isPanelOpen, setIsPanelOpen] = useState(false);
     const [isMotoboyPanelOpen, setIsMotoboyPanelOpen] = useState(false);  // Estado para o painel de motoboy
     const [currentEntrega, setCurrentEntrega] = useState(null);
+    const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o termo de pesquisa
+    const img = 'https://img.pikbest.com/backgrounds/20200423/2d-labor-day-delivery-banner_1910020.jpg!bw700'
 
     useEffect(() => {
         fetchData();
@@ -25,7 +28,7 @@ function Cards() {
     const fetchData = async () => {
         const { data, error } = await supabase
             .rpc('fetch_entregas_com_nome_cliente');
-    
+
         if (error) {
             console.error('Erro ao carregar os dados:', error);
             setError(error);
@@ -39,7 +42,7 @@ function Cards() {
         const { data, error } = await supabase
             .from('motoboys') // Aqui você vai buscar os motoboys
             .select('*');
-    
+
         if (error) {
             console.error('Erro ao carregar os motoboys:', error);
             setError(error);
@@ -51,16 +54,16 @@ function Cards() {
 
     const deleteEntrega = async (id) => {
         const shouldDelete = window.confirm("Tem certeza que deseja excluir esta entrega?");
-        
+
         if (!shouldDelete) {
             return;
         }
-        
+
         const { error } = await supabase
             .from('entregas')
             .delete()
             .eq('id', id);
-        
+
         if (error) {
             setError(error);
         } else {
@@ -111,6 +114,11 @@ function Cards() {
         setIsMotoboyPanelOpen(false);  // Fecha o painel de motoboys
     };
 
+    // Filtra as entregas com base no nome do cliente
+    const filteredEntregas = entregas.filter(entrega =>
+        entrega.nome_cliente.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     if (error) {
         return <div>Erro ao carregar os dados: {error.message}</div>;
     };
@@ -126,54 +134,78 @@ function Cards() {
     }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
     return (
-        <div className="container-fluid">
-            <div className={`container ${isPanelOpen || isMotoboyPanelOpen ? 'side-panel-open' : ''}`}>
-                <div className="btn-group d-flex flex-wrap" role="group" aria-label="Basic outlined example">
-                    <button type="button" className="btn btn-success btn-lg mb-3" onClick={toggleSidePanel}>Inserir</button>
-                    <button type="button" className="btn btn-outline-primary btn-lg mb-3" onClick={fetchData}>Atualizar</button>
-                </div>
-
-                <TransitionGroup className="table-responsive mt-3">
-                    <table className="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Nome cliente</th>
-                                <th scope="col">Endereço de Retirada</th>
-                                <th scope="col">Endereço de Entrega</th>
-                                <th scope="col">Valor</th>
-                                <th scope="col">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {entregas.map((entrega) => (
-                                <CSSTransition key={entrega.id} timeout={500} classNames="fade">
-                                    <tr>
-                                        <td>{entrega.id}</td>
-                                        <td>{entrega.nome_cliente}</td>
-                                        <td>{entrega.endereco_retirada}</td>
-                                        <td>{entrega.endereco_entrega}</td>
-                                        <td>R$ {entrega.vr_calculado}</td>
-                                        <td>
-                                            <div className="btn-group" role="group" aria-label="Basic outlined example">
-                                                <button className="btn btn-primary" onClick={() => openEncaminharPanel(entrega)}>Encaminhar</button>
-                                                <button className="btn btn-secondary" onClick={() => openEditPanel(entrega)}>Editar</button>
-                                                <button className="btn btn-danger" onClick={() => deleteEntrega(entrega.id)}>Deletar</button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </CSSTransition>
-                            ))}
-                        </tbody>
-                    </table>
-                </TransitionGroup>
-
-                {/* Exibe o SidePanel para editar ou inserir entrega */}
-                {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
-
-                {/* Exibe o SidePanelMotoboy para encaminhar a entrega */}
-                {isMotoboyPanelOpen && <SidePanelMotoboy onClose={closeMotoboyPanel} entrega={currentEntrega} motoboys={motoboys} />}
+        <div className={`container ${isPanelOpen || isMotoboyPanelOpen ? 'side-panel-open' : ''}`}>
+            <div className="btn-group" role="group" aria-label="Basic outlined example">
+                <button type="button" className="btn btn-success btn-lg mb-3" onClick={toggleSidePanel}>Inserir</button>
+                <button type="button" className="btn btn-outline-primary btn-lg mb-3" onClick={fetchData}>Atualizar</button>
             </div>
+
+            {/* Caixa de pesquisa */}
+            <div className="mb-3">
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Pesquisar pelo nome do cliente"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <hr />
+
+            {/* Row contendo as colunas de cards */}
+            <div className="row row-cols-1 row-cols-md-4 g-4">
+                {filteredEntregas.map((entrega) => (
+                    <TransitionGroup>
+                        <CSSTransition key={entrega.id} timeout={500} classNames="fade">
+                            <div className="col">
+                                <div className="card h-100 shadow-sm">
+                                    <img src={img} className="card-img-top" alt="..." style={{ maxHeight: '150px', objectFit: 'cover' }} />
+                                    <div className="card-body p-2">
+                                        <h5 className="card-title text-truncate" style={{ fontSize: '1rem' }}>
+                                            Entrega #{entrega.id}
+                                        </h5>
+
+                                        <p className="card-text text-truncate fs-5" style={{ fontSize: '0.875rem' }}>
+                                            <i className="fas fa-user"></i> {entrega.nome_cliente}
+                                        </p>
+
+                                        <p className="card-text text-truncate" style={{ fontSize: '0.875rem' }}>
+                                            <i className="fas fa-map-marker-alt"></i> {entrega.endereco_retirada}
+                                        </p>
+
+                                        <p className="card-text text-truncate" style={{ fontSize: '0.875rem' }}>
+                                            <i className="fas fa-map-pin"></i> {entrega.endereco_entrega}
+                                        </p>
+
+                                        <p className="card-text" style={{ fontSize: '0.875rem' }}>
+                                            <i className="fas fa-money-bill-wave"></i> R$ {entrega.vr_calculado}
+                                        </p>
+
+                                        <div className="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
+                                            <button className="btn btn-primary btn-sm" onClick={() => openEncaminharPanel(entrega)}>
+                                                <i className="fas fa-paper-plane"></i> Encaminhar
+                                            </button>
+                                            <button className="btn btn-secondary btn-sm" onClick={() => openEditPanel(entrega)}>
+                                                <i className="fas fa-edit"></i> Editar
+                                            </button>
+                                            <button className="btn btn-danger btn-sm" onClick={() => deleteEntrega(entrega.id)}>
+                                                <i className="fas fa-trash-alt"></i> Deletar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </CSSTransition>
+                    </TransitionGroup>
+                ))}
+            </div>
+
+
+            {/* Exibe o SidePanel para editar ou inserir entrega */}
+            {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}
+
+            {/* Exibe o SidePanelMotoboy para encaminhar a entrega */}
+            {isMotoboyPanelOpen && <SidePanelMotoboy onClose={closeMotoboyPanel} entrega={currentEntrega} motoboys={motoboys} />}
         </div>
     );
 }

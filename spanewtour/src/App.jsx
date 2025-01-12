@@ -98,7 +98,7 @@ export default function App() {
           </div>
 
           {/* Main content */}
-          <div className="container mt-4" style={{ marginLeft: '250px', flex: 1 }}>
+          <div className="container mt-4" style={{ marginLeft: '10px', flex: 1 }}>
             <Routes>
               <Route path="/" element={<Cards />} />
               {/* Defina as rotas adicionais aqui se necessário */}
