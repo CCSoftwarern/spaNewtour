@@ -69,7 +69,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="d-flex flex-column flex-md-row shadow">
+      <div className="d-flex flex-column flex-md-row ">
         {/* Sidebar */}
         <div
           className="bg-danger text-white border-end shadow position-fixed"

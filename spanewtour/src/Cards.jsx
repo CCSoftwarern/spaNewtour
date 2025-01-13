@@ -141,6 +141,36 @@ function Cards() {
         return () => clearInterval(intervalId);
     }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
+    //formatar data por extenso
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('pt-BR', {
+            weekday: 'long',  // Exibe o dia da semana
+            year: 'numeric',  // Exibe o ano
+            month: 'long',    // Exibe o mês por extenso
+            day: 'numeric',   // Exibe o dia
+        });
+    };
+    const formatDateTime = (dateString) => {
+        const date = new Date(dateString);
+    
+        // Subtrai 3 horas da data
+        date.setHours(date.getHours() - 3);
+    
+        return date.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,  // Exibe no formato 24h
+        });
+    };
+    
+    
+    
+
     return (
         
         <div className={`container ${isPanelOpen || isMotoboyPanelOpen ? 'side-panel-open' : ''}`}>
@@ -184,12 +214,15 @@ function Cards() {
                     <TransitionGroup>
                         <CSSTransition key={entrega.id} timeout={500} classNames="fade">
                             <div className="col">
-                                <div className="card h-100 shadow-sm">
+                                <div className="card h-100 shadow-lg">
                                     <img src={img} className="card-img-top" alt="..." style={{ maxHeight: '150px', objectFit: 'cover' }} />
                                     <div className="card-body p-2">
                                         <h5 className="card-title text-truncate" style={{ fontSize: '1rem' }}>
                                             Entrega #{entrega.id}
                                         </h5>
+                                        <p className="card-text" style={{ fontSize: '0.875rem' }}>
+                                            <i className="bi bi-calendar3"></i> {formatDateTime(entrega.dt_cadastro)}
+                                        </p>
 
                                         <p className="card-text text-truncate fw-bold" style={{ fontSize: '1.2rem' }}>
                                             <i className="bi bi-person-circle"></i> {entrega.nome_cliente}
@@ -207,6 +240,7 @@ function Cards() {
                                             <i className="bi bi-coin"></i> R$ {entrega.vr_calculado}
                                         </p>
 
+                                        <div className='card-footer'>
                                         <div className="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
                                             <button className="btn btn-primary btn-sm" onClick={() => openEncaminharPanel(entrega)}>
                                                 <i className="fas fa-paper-plane"></i> Encaminhar
@@ -218,6 +252,9 @@ function Cards() {
                                                 <i className="fas fa-trash-alt"></i> Deletar
                                             </button>
                                         </div>
+
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
