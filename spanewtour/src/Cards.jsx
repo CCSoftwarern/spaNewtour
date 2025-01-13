@@ -18,6 +18,7 @@ function Cards() {
     const [isMotoboyPanelOpen, setIsMotoboyPanelOpen] = useState(false);  // Estado para o painel de motoboy
     const [currentEntrega, setCurrentEntrega] = useState(null);
     const [searchTerm, setSearchTerm] = useState(''); // Estado para armazenar o termo de pesquisa
+    const [loading, setLoading] = useState(false); // Estado para controle de loading
     const img = 'https://img.pikbest.com/backgrounds/20200423/2d-labor-day-delivery-banner_1910020.jpg!bw700'
 
     useEffect(() => {
@@ -26,6 +27,7 @@ function Cards() {
     }, []);
 
     const fetchData = async () => {
+        setLoading(true); // Inicia o carregamento
         const { data, error } = await supabase
             .rpc('fetch_entregas_com_nome_cliente');
 
@@ -36,9 +38,11 @@ function Cards() {
             console.log('Dados carregados:', data);
             setEntregas(data);
         }
+        setLoading(false); // Finaliza o carregamento
     };
 
     const fetchMotoboys = async () => {
+        setLoading(true); // Inicia o carregamento
         const { data, error } = await supabase
             .from('motoboys') // Aqui você vai buscar os motoboys
             .select('*');
@@ -50,15 +54,14 @@ function Cards() {
             console.log('Motoboys carregados:', data);
             setMotoboys(data);
         }
+        setLoading(false); // Finaliza o carregamento
     };
 
     const deleteEntrega = async (id) => {
         const shouldDelete = window.confirm("Tem certeza que deseja excluir esta entrega?");
+        if (!shouldDelete) return;
 
-        if (!shouldDelete) {
-            return;
-        }
-
+        setLoading(true); // Inicia o carregamento
         const { error } = await supabase
             .from('entregas')
             .delete()
@@ -69,9 +72,11 @@ function Cards() {
         } else {
             setEntregas(entregas.filter(entrega => entrega.id !== id));
         }
+        setLoading(false); // Finaliza o carregamento
     };
 
     const updateEntrega = async (entrega) => {
+        setLoading(true); // Inicia o carregamento
         const { data, error } = await supabase
             .from('entregas')
             .update({ id_pessoa: entrega.id_pessoa, endereco_retirada: entrega.endereco_retirada, endereco_entrega: entrega.endereco_entrega })
@@ -81,9 +86,11 @@ function Cards() {
         } else {
             setEntregas(entregas.map(e => (e.id === entrega.id ? data[0] : e)));
         }
+        setLoading(false); // Finaliza o carregamento
     };
 
     const insertEntrega = async (newEntrega) => {
+        setLoading(true); // Inicia o carregamento
         const { data, error } = await supabase
             .from('entregas')
             .insert([newEntrega]);
@@ -93,6 +100,7 @@ function Cards() {
             fetchData();
             setEntregas([...entregas, data[0]]);
         }
+        setLoading(false); // Finaliza o carregamento
     };
 
     const toggleSidePanel = () => {
@@ -134,10 +142,26 @@ function Cards() {
     }, []); // O array vazio garante que o efeito seja executado apenas uma vez ao montar o componente
 
     return (
+        
         <div className={`container ${isPanelOpen || isMotoboyPanelOpen ? 'side-panel-open' : ''}`}>
-            <div className="btn-group" role="group" aria-label="Basic outlined example">
+          <h3>Entregas</h3>
+            <div className="btn-group mt-3" role="group" aria-label="Basic outlined example">
                 <button type="button" className="btn btn-success btn-lg mb-3" onClick={toggleSidePanel}>Inserir</button>
                 <button type="button" className="btn btn-outline-primary btn-lg mb-3" onClick={fetchData}>Atualizar</button>
+
+                {/* Exibe um spinner de carregamento se o estado de loading for verdadeiro */}
+
+                <div className='container-fluid'>
+                {loading && (
+                    <div className="d-flex justify-content-center my-2 ">
+                        <div className="spinner-border text-primary" role="status">
+                            <span className="visually-hidden" >Carregando...</span>
+                        </div>
+                    </div>
+                )}
+
+                </div>
+
             </div>
 
             {/* Caixa de pesquisa */}
@@ -152,6 +176,8 @@ function Cards() {
             </div>
             <hr />
 
+
+
             {/* Row contendo as colunas de cards */}
             <div className="row row-cols-1 row-cols-md-4 g-4">
                 {filteredEntregas.map((entrega) => (
@@ -165,20 +191,20 @@ function Cards() {
                                             Entrega #{entrega.id}
                                         </h5>
 
-                                        <p className="card-text text-truncate fs-5" style={{ fontSize: '0.875rem' }}>
-                                            <i className="fas fa-user"></i> {entrega.nome_cliente}
+                                        <p className="card-text text-truncate fw-bold" style={{ fontSize: '1.2rem' }}>
+                                            <i className="bi bi-person-circle"></i> {entrega.nome_cliente}
                                         </p>
 
                                         <p className="card-text text-truncate" style={{ fontSize: '0.875rem' }}>
-                                            <i className="fas fa-map-marker-alt"></i> {entrega.endereco_retirada}
+                                            <i className="bi bi-pin-map-fill"></i> {entrega.endereco_retirada}
                                         </p>
 
                                         <p className="card-text text-truncate" style={{ fontSize: '0.875rem' }}>
-                                            <i className="fas fa-map-pin"></i> {entrega.endereco_entrega}
+                                            <i className="bi bi-geo-fill"></i> {entrega.endereco_entrega}
                                         </p>
 
-                                        <p className="card-text" style={{ fontSize: '0.875rem' }}>
-                                            <i className="fas fa-money-bill-wave"></i> R$ {entrega.vr_calculado}
+                                        <p className="card-text text-end fs-5 text fw-bold" style={{ fontSize: '1rem' }}>
+                                            <i className="bi bi-coin"></i> R$ {entrega.vr_calculado}
                                         </p>
 
                                         <div className="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
@@ -199,7 +225,6 @@ function Cards() {
                     </TransitionGroup>
                 ))}
             </div>
-
 
             {/* Exibe o SidePanel para editar ou inserir entrega */}
             {isPanelOpen && <SidePanel onClose={toggleSidePanel} onInsert={insertEntrega} onUpdate={updateEntrega} entrega={currentEntrega} />}

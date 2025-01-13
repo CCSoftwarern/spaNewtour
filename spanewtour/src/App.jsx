@@ -14,7 +14,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 export default function App() {
   const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
-  
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -51,7 +51,7 @@ export default function App() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []); 
+  }, []);
 
   if (!session) {
     return (
@@ -68,44 +68,60 @@ export default function App() {
   }
 
   return (
-    <BrowserRouter> {/* Envolva toda a aplicação com o BrowserRouter */}
-      <>
-        <div>
-          <nav className="navbar navbar-expand-lg navbar-dark bg-danger">
-            <div className="container-fluid">
-              <a className="navbar-brand fs-4" href="#">
-                <i className="bi bi-stack-overflow me-2"></i>{user?.email}
-              </a>
-              <button onClick={signOut} className="btn btn-outline-light">Sair</button>
-            </div>
-          </nav>
-        </div>
+    <BrowserRouter>
+      <div className="d-flex flex-column flex-md-row shadow">
+        {/* Sidebar */}
+        <div
+          className="bg-danger text-white border-end shadow position-fixed"
+          style={{ width: '250px', height: '100vh', padding: '1rem' }}
 
-        <div className="d-flex">
-          {/* Sidebar */}
-          <div className="bg-light border-end" style={{ width: '250px', height: '100vh' }}>
-            <ul className="nav flex-column p-3">
-              <li className="nav-item">
-                <Link className="nav-link fs-5" to="/">Entregas</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link fs-5" to="/ematendimento">Em Atendimento</Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link fs-5" to="/finalizados">Finalizados</Link>
-              </li>
-            </ul>
+        >
+          <div class="text-wrap text-center">
+            <i className="bi bi-person" style={{ marginRight: '10px' }}></i>
+            {user?.email}
           </div>
 
-          {/* Main content */}
-          <div className="container mt-4" style={{ marginLeft: '10px', flex: 1 }}>
-            <Routes>
-              <Route path="/" element={<Cards />} />
-              {/* Defina as rotas adicionais aqui se necessário */}
-            </Routes>
-          </div>
+          <hr />
+          <ul className="nav flex-column">
+            <li className="nav-item">
+              <Link className="nav-link fs-5 text-white d-flex align-items-center btn btn-danger" to="/">
+                <i className="bi bi-boxes" style={{ marginRight: '10px' }}></i>
+                Entregas
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fs-5 text-white d-flex align-items-center btn btn-danger" to="/ematendimento">
+                <i className="bi bi-clock" style={{ marginRight: '10px' }}></i>
+                Em Atendimento
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fs-5 text-white d-flex align-items-center btn btn-danger" to="/finalizados">
+                <i className="bi bi-check-circle" style={{ marginRight: '10px' }}></i>
+                Finalizados
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link fs-5 text-white d-flex align-items-center btn btn-danger" to="/cadastromotoboys">
+                <i className="bi bi-person-workspace" style={{ marginRight: '10px' }}></i>
+                Motoboys
+              </Link>
+            </li>
+            <hr />
+            <li className="nav-item">
+              <button onClick={signOut} className="nav-link fs-5 text-white d-flex align-items-center btn btn-danger"><i class="bi bi-door-closed" style={{ marginRight: '10px' }}></i>  Sair</button>
+            </li>
+          </ul>
         </div>
-      </>
-    </BrowserRouter> 
+
+        {/* Main content */}
+        <div className="container mt-4" style={{ marginLeft: '250px', padding: '1rem', flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Cards />} />
+            {/* Defina as rotas adicionais aqui se necessário */}
+          </Routes>
+        </div>
+      </div>
+    </BrowserRouter>
   );
 }

@@ -123,7 +123,7 @@ const SidePanelMotoboy = ({ onClose, entrega }) => {
               style={{ width: '100%' }}
             >
               <Card.Body className="p-2">
-                <Card.Title className="d-flex align-items-center fs-6">
+                <Card.Title className="d-flex align-items-center fs-5">
                   <i className="bi bi-person-circle me-2"></i>
                   {motoboy.nome}
                 </Card.Title>
@@ -142,7 +142,7 @@ const SidePanelMotoboy = ({ onClose, entrega }) => {
                       <i className="bi bi-whatsapp" style={{ fontSize: '1.2rem' }}></i>
                     </a>
                   </ListGroup.Item>
-                  <ListGroup.Item className="p-1"><strong>Status:</strong> {motoboy.ativo ? 'Ativo' : 'Inativo'}</ListGroup.Item>
+                 
                 </ListGroup>
                 <Form.Check
                   type="switch"
